@@ -1,7 +1,7 @@
-import requests
 import json
-from datetime import *
+import requests
 from tqdm import tqdm
+from datetime import *
 from pprint import pprint
 
 def token_get():
@@ -15,10 +15,10 @@ class VkToYaDisk():
     def __init__(self,
                  vk_token=token_get(),
                  vk_ids=int(input('Введите ID пользователя VK: ')),
-                 ya_token=input('Введите токен Яндекса: ')):
-        self.yad_headers = {'Content-Type': 'application/json',
-                            'Authorization': f'OAuth {ya_token}'}
+                 ya_token=input('Введите токен API ЯндексДиска: ')):
         self.yad_api_url = 'https://cloud-api.yandex.net/v1/disk/resources'
+        self.yad_headers = {'Authorization': f'OAuth {ya_token}',
+                            'Content-Type': 'application/json'}
         self.vk_params = {'access_token': vk_token,
                           'album_id': 'profile',
                           'owner_id': vk_ids,
@@ -30,8 +30,8 @@ class VkToYaDisk():
     def yandex_folder(self):
         """" Функция создаёт папку на ЯндексДиске с именем по текущей дате """
         params = {"path": f'{str(date.today())}'}
-        response = requests.put(self.yad_api_url,
-                                headers=self.yad_headers,
+        response = requests.put(headers=self.yad_headers,
+                                url=self.yad_api_url,
                                 params=params)
 
     def post_to_yad(self, params):
@@ -43,11 +43,11 @@ class VkToYaDisk():
     def yad_upload(self, count=5):
         """ Метод получает ссылки на фотографии профиля VK и выгружает
             их на ЯндексДиск в папку с именем по текущей дате;
-            информация о загруженных фото сохраняется в json файл"""
-        count_likes, vk_url = [], 'https://api.vk.com/method/photos.get'
+            информация сохраняется в json файл"""
         self.yandex_folder()
+        info_list, count_likes = [], []
+        vk_url = 'https://api.vk.com/method/photos.get'
         resp = requests.get(vk_url, params=self.vk_params)
-        info_list = []
         for items in tqdm(resp.json()['response']['items'][0:count]):
             # выбор имени для конечного файла на ЯндексДиске:
             if items['likes']['count'] not in count_likes:
@@ -64,22 +64,23 @@ class VkToYaDisk():
                 final_url = items['sizes'][types_list.index('w')]['url']
                 path_to_file = f'{date.today()}/{file_name}.jpg'
                 params = {'path': path_to_file, 'url': final_url}
-                self.post_to_yad(params)
                 info_list.append({'file_name': f'{file_name}.jpg',
                                   'type': 'w'})
+                self.post_to_yad(params)
             else:
                 final_url = items['sizes'][-1]['url']
                 path_to_file = f'{date.today()}/{file_name}.jpg'
                 params = {'path': path_to_file, 'url': final_url}
-                self.post_to_yad(params)
                 info_list.append({'file_name': f'{file_name}.jpg',
                                   'type': items['sizes'][-1]['type']})
+                self.post_to_yad(params)
             self.upload_info["info"] = info_list
+        # Запись в json файл:
         with open('reserv_info.json', 'w') as f:
             json.dump(self.upload_info, f)
-        print('Фотографии профиля загружены!')
+        print('Фотографии загружены!')
 
-
+# Тест программы:
 if __name__ == "__main__":
     test = VkToYaDisk()
     test.yad_upload(10)
