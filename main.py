@@ -25,7 +25,7 @@ class VkApi():
                            'album_id': 'profile', 'extended': 1}
         resp = requests.get(params=self.vk_params | vk_photo_params,
                             url=vk_method)
-        print("Получение ссылок для загрузки.... ")
+        print('Получение ссылок для загрузки.... ')
         for items in resp.json()['response']['items'][0:count]:
             # Определение имени для файла:
             if items['likes']['count'] not in count_likes:
@@ -34,9 +34,7 @@ class VkApi():
             else:
                 file_name = f'{items["date"]}.jpg'
             # Получение ссылки на фото максимального качества:
-            types_list = []
-            for type_quality in items['sizes']:
-                types_list.append(type_quality['type'])
+            types_list = [i['type'] for i in items['sizes']]
             if 'w' in types_list:
                 info = {'file_name': file_name, 'type': 'w'}
                 final_url = items['sizes'][types_list.index('w')]['url']
