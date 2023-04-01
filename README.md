@@ -1,4 +1,4 @@
 
 
-Для работы программы необходимо скопировать [ключ доступа](https://dev.vk.com/api/access-token/getting-started) VK
-в файл VKtoken.txt
+Для работы программы необходимо [ключ доступа API VK](https://dev.vk.com/api/access-token/getting-started)
+и [токен API ЯндексДиска](reserv_info) поместить в файл __"tokens.ini"__
