@@ -1,9 +1,10 @@
 import json
 import requests
 from tqdm import tqdm
-from datetime import *
+from datetime import date
 from pprint import pprint
 import configparser
+
 
 class VkApi():
     def __init__(self, vk_token, vk_ids):
@@ -51,6 +52,7 @@ class VkApi():
     def vk_info_json(self):
         with open('reserv_info.json', 'w') as f:
             json.dump(self.upload_info, f)
+
 
 class YadApi():
     def __init__(self, yad_token):
